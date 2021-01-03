@@ -25,7 +25,7 @@ module PagSeguro
       )
     end
 
-    def get_without_api_version(path, data={}, headers={})
+    def get_without_api_version(path, data = {}, headers = {})
       request.get(path, extended_data(data), headers)
     end
 
@@ -40,6 +40,10 @@ module PagSeguro
       execute :post, path, api_version, data, headers
     end
 
+    def post_without_api_version(path, data = {}, headers = {})
+      execute :post, path, '', data, headers
+    end
+
     # Perform a POST request, sending XML data.
     #
     # # +path+: the path that will be requested. Must be something like <tt>"checkout"</tt>.
@@ -47,13 +51,13 @@ module PagSeguro
     # # +credentials+: the credentials like ApplicationCredentials or AccountCredentials.
     # # +data+: the data that will be sent as body data. Must be a XML.
     #
-    def post_xml(path, api_version, credentials, data = '', options={})
+    def post_xml(path, api_version, credentials, data = '', options = {})
       credentials_params = credentials_to_params(credentials)
       url_path = [api_version, path].reject(&:nil?).join('/')
 
       request.post do
         url PagSeguro.api_url("#{url_path}?#{credentials_params}")
-        headers "Content-Type" => "application/xml; charset=#{PagSeguro.encoding}"
+        headers 'Content-Type' => "application/xml; charset=#{PagSeguro.encoding}"
         headers.merge!(options[:headers]) if options[:headers]
         body data
       end
@@ -70,8 +74,8 @@ module PagSeguro
 
       request.put do
         url full_url
-        headers "Content-Type" => "application/xml; charset=#{PagSeguro.encoding}",
-                "Accept" => "application/vnd.pagseguro.com.br.v1+xml;charset=ISO-8859-1"
+        headers 'Content-Type' => "application/xml; charset=#{PagSeguro.encoding}",
+                'Accept' => 'application/vnd.pagseguro.com.br.v1+xml;charset=ISO-8859-1'
         body data
       end
     end
@@ -81,17 +85,18 @@ module PagSeguro
     def execute(request_method, path, api_version, data, headers) # :nodoc:
       request.public_send(
         request_method,
-        PagSeguro.api_url("#{api_version}/#{path}"),
+        PagSeguro.api_url("#{api_version}/#{path}").gsub('///', '//'),
         extended_data(data),
         extended_headers(request_method, headers)
       )
     end
 
     private
+
     def request
       @request ||= Aitch::Namespace.new
       @request.configure do |config|
-        config.timeout = 50 
+        config.timeout = 50
       end
       @request
     end
@@ -112,14 +117,14 @@ module PagSeguro
 
     def headers_for_post
       {
-        "Accept-Charset" => PagSeguro.encoding,
-        "Content-Type" => "application/x-www-form-urlencoded; charset=#{PagSeguro.encoding}"
+        'Accept-Charset' => PagSeguro.encoding,
+        'Content-Type' => "application/x-www-form-urlencoded; charset=#{PagSeguro.encoding}"
       }
     end
 
     def headers_for_get
       {
-        "Accept-Charset" => PagSeguro.encoding
+        'Accept-Charset' => PagSeguro.encoding
       }
     end
 
@@ -163,8 +168,8 @@ module PagSeguro
 
   Request.configure do |config|
     config.default_headers = {
-      "lib-description"             => "ruby:#{PagSeguro::VERSION}",
-      "language-engine-description" => "ruby:#{RUBY_VERSION}"
+      'lib-description' => "ruby:#{PagSeguro::VERSION}",
+      'language-engine-description' => "ruby:#{RUBY_VERSION}"
     }
   end
 end
